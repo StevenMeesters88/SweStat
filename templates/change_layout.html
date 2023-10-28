@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div class="center_div">
+    <h1>Change graph {{ graph_no }}</h1>
+</div>
+
+<br>
+
+{{ chart|safe }}
+
+<div class="center_div">
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in layout_form %}
+            {{ field.label }} {{ field }} <br>
+        {% endfor %}
+        <button type="submit">Update</button>
+    </form>
+</div>
+
+{% endblock %}

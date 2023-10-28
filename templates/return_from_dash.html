@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+
+<div class="center_div">
+    <h2 class="h2_title">Dashboard Config</h2>
+</div>
+
+<div class="center_div">
+
+    <br><br>
+
+    <div class="center">
+        <h3 class="h3_title">Detected variables</h3>
+        <div class="center" style="font-size: 25px; margin-top: -1%;">
+            {% for col in columns %}
+                {{ col }} <br>
+            {% endfor %}
+        </div>
+
+        <br><br><br>
+
+        <div>
+            <h3 class="h3_title">Enter a main title for your dashboard</h3>
+            <div>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in title_form %}
+                        {{ field }}
+                    {% endfor %}
+                    <button type="submit" class="button">Confirm</button>
+                </form>
+            </div>
+        </div>
+
+        <br><br><br>
+
+        <h3 class="h3_title">Create graph</h3>
+
+        <div>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.label|slice:"0:5" == 'Titel' %}
+                        {{ field }} <br><br><br>
+                    {% else %}
+                        {{ field }} <br>
+                    {% endif %}
+                {% endfor %}
+                <button class="button" type="submit">Create Dashboard</button>
+            </form>
+
+            <div class="center_div">
+                <button type="button" class="button" onclick="location.href='{% url 'configure_dashboard' %}'">Add graph</button>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+{% endblock content %}

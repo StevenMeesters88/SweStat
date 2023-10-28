@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div class="center_div">
+    <div class="inline">
+        <button type="button" class="button" onclick="location.href='{% url 'configure_dashboard' %}'">Create Dashboard</button>
+    </div>
+</div>
+
+<br>
+<br>
+
+<div class="center_div">
+    <h2 class="h2_title">Uploaded data</h2>
+    <h3 class="h3_title">Data source: {{ extention }}</h3>
+    <h3 class="h3_title">Meta Data: <br> {{ meta_r }} rows & {{ meta_c }} columns detected</h3>
+</div>
+
+<br>
+<br>
+
+<div class="center_div">
+    <div class="sketchy">
+        {% if meta_r > 10 %}
+            <div class="left_div">Only showing the first 10 rows...</div>
+        {% endif %}
+        <table style="margin-left: auto; margin-right: auto;">
+            <tr>
+                {% for col in df.columns %}
+                <td>
+                    <b>{{col}}</b>
+                </td>
+                {% endfor %}
+            </tr>
+            {% for index, row in df.iterrows %}
+                <tr>
+                    {% for cell in row %}
+                    <td>
+                        {{cell}}
+                    </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+{% endblock %}

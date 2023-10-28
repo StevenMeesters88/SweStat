@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="center_div">
+    <div class="inline">
+        <button type="button" class="button" onclick="location.href='{% url 'upload_document' %}'">Back to data</button>
+        <button type="button" class="button" onclick="location.href='{% url 'return_from_dash' %}'">Config panel</button>
+    </div>
+</div>
+
+<br>
+<br>
+
+{% if dash_title == 'NO_TITLE' %}
+    <h1 style="text-align: center; font-size: 50px;">Din dashboard</h1>
+{% else %}
+  <h1 style="text-align: center; font-size: 50px;">{{ dash_title }}</h1>
+{% endif %}
+
+    {% for graph_no, chart in fig_list %}
+        {{ chart|safe }}
+        <div style="text-align: right;">
+            <a style="color: orange; background: black;" href="{% url 'change_layout' graph_no %}">Layout</a>
+        </div>
+    {% endfor %}
+
+
+{% endblock content %}
