@@ -10,6 +10,10 @@ import plotly.express as px
 file_loc = r'/Users/stevenmeesters/PycharmProjects/SweStat/media/'
 
 
+def temptest(request):
+    return render(request, 'temptest.html')
+
+
 def home(request):
     # add deletion of data!
     def delete_data():
