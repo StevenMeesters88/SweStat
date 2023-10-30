@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 import plotly.express as px
 
-file_loc = r'/Users/stevenmeesters/PycharmProjects/SweStat/media/'
+file_loc = r'/Users/stevenmeesters/PycharmProjects/SweStat/media/'  # /home/SweStat/SweStat/media i pythonanywhere
 
 
 def home(request):
