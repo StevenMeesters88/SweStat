@@ -121,9 +121,15 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+# IN PYTON ANYWHERE
+# STATIC_URL = '/home/SweStat/SweStat/static'
+# STATIC_ROOT = '/home/SweStat/SweStat/static'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+# IN PYTHON ANYWHERE
+# MEDIA_URL = '/home/SweStat/SweStat/media/'
+# MEDIA_ROOT = '/home/SweStat/SweStat/media/'
 
 
 # Default primary key field type
