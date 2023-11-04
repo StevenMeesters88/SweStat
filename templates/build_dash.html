@@ -20,9 +20,8 @@
     {% for graph_no, chart in fig_list %}
         {{ chart|safe }}
         <div style="text-align: right;">
-            <a style="color: orange; background: black;" href="{% url 'change_layout' graph_no %}">Layout</a>
+            <a style="color: black;" href="{% url 'change_layout' graph_no %}">Layout</a>
         </div>
     {% endfor %}
-
 
 {% endblock content %}

@@ -106,6 +106,7 @@ def configure_dashboard(request):
 
     if request.method == 'GET':
         try:
+            print('try')
             n_forms = models.FormCounter.objects.filter(session_key=request.session.session_key).latest('id').form_count
             number = n_forms
             models.FormCounter.objects.filter(session_key=request.session.session_key).delete()
@@ -113,12 +114,14 @@ def configure_dashboard(request):
                                    form_count=number + 1)
             m.save()
         except ObjectDoesNotExist:
+            print('ObjectDoesNotExist')
             m = models.FormCounter(session_key=request.session.session_key,
                                    form_count=1)
             m.save()
             n_forms = 1
 
     n_forms = models.FormCounter.objects.filter(session_key=request.session.session_key).latest('id').form_count
+    print(n_forms)
 
     cols = []
     for column in models.DocumentVariables.objects.filter(session_key=request.session.session_key).values():
@@ -127,7 +130,9 @@ def configure_dashboard(request):
     graph_form = forms.CreateMultiLoopChartForm(request.POST, cols, n_forms)
 
     if request.method == 'POST':
+        print('POST check')
         if graph_form.is_valid():
+            print('Valid')
             for idx in range(n_forms):
                 m = models.SimpleGraphModel(
                     session_key=request.session.session_key,
@@ -173,50 +178,33 @@ def dashboard(request):
 
     graph_info = models.SimpleGraphModel.objects.filter(session_key=request.session.session_key).values()
 
-    def create_chart(chart_no, chart, x, y, titel, color, bg_color):
+    def create_chart(chart_no, chart, x, y, titel, layout, color):
+        final_titel = titel
+        for d in layout:
+            final_titel = d['graph_title'] if d['graph_title'] != '' else titel
         if chart == 'Linjediagram':
-            return px.line(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.line(data_frame=df, x=x, y=y, title=final_titel).update_traces(line_color=color)
         if chart == 'Stapeldiagram':
-            return px.bar(data_frame=df, x=x, y=y, title=titel).update_traces(marker_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.bar(data_frame=df, x=x, y=y, title=final_titel).update_traces(marker_color=color)
         if chart == 'Korrelationsgraf':
-            return px.scatter(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.scatter(data_frame=df, x=x, y=y, title=final_titel).update_traces(line_color=color)
         if chart == 'Kaka':
-            return px.pie(data_frame=df, names=x, values=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.pie(data_frame=df, names=x, values=y, title=final_titel).update_traces(line_color=color)
 
     fig_list = []
     for x in graph_info:
-        color = '#636EFA'
-        bg_color = '#f0f8ff'
-        title = 'Your Graph'
-        print(f"Graph info: {x['graph_no']}")
-        layout_info = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(graph_id=x['graph_no']).values()
+        layout_info = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(
+            graph_id=x['graph_no']).values()
         if layout_info:
-            print(f"Graph info: {x['graph_no']}, LAYOUT FINNS")
             for d in layout_info:
                 color = d['color']
-                title = d['graph_title'] if d['graph_title'] != '' else 'Your Dashboard'
-                bg_color = d['bg_color']
-
-        fig = create_chart(chart_no=x['graph_no'], chart=x['chart_type'], x=x['x'], y=x['y'], titel=title, color=color, bg_color=bg_color)
+        else:
+            color = '#636EFA'
+        fig = create_chart(chart_no=x['graph_no'], chart=x['chart_type'], x=x['x'], y=x['y'], titel=x['titel'],
+                           layout=layout_info, color=color)
         for data in layout_info:
             if data['graph_title_center'] is True:
                 fig.update_layout(title_x=0.5)
-
-        fig.update_xaxes(
-                mirror=True,
-                ticks='outside',
-                showline=True,
-                linecolor='black' if bg_color != 'black' else 'white',
-                gridcolor='lightgrey' if bg_color != 'black' else 'white',
-            )
-        fig.update_yaxes(
-                mirror=True,
-                ticks='outside',
-                showline=True,
-                linecolor='black' if bg_color != 'black' else 'white',
-                gridcolor='lightgrey' if bg_color != 'black' else 'white',
-            )
-
         fig = fig.to_html()
         fig_list.append([x['graph_no'], fig])
 
@@ -336,7 +324,7 @@ def change_layout(request, graph_no):
     layout_data = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(graph_id=graph_no).values()
     centered = False
     color = '#636EFA'
-    graph_bg = '#f0f8ff'
+    graph_bg = '#636EFA'
     if layout_data:
         for x in layout_data:
             centered = x['graph_title_center']
@@ -348,8 +336,7 @@ def change_layout(request, graph_no):
     graph_data = models.SimpleGraphModel.objects.filter(session_key=request.session.session_key).filter(
         graph_no=graph_no).values()
     for x in graph_data:
-        title = x['titel'] if x['titel'] != '' else 'Your Graph'
-        fig = create_chart(x['chart_type'], x['x'], x['y'], title, color, graph_bg)
+        fig = create_chart(x['chart_type'], x['x'], x['y'], x['titel'], color, graph_bg)
 
     layout_form = forms.ChangeGraphLayoutForm(request.POST, centered)
     if request.method == 'POST':

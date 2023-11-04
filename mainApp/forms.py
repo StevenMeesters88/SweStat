@@ -86,8 +86,17 @@ class GraphTitleFormNew(forms.Form):
 
 
 class ChangeGraphLayoutForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(ChangeGraphLayoutForm, self).__init__(*args, **kwargs)
+        req, centered = args
+
+        print('form: ', centered)
+
+        self.fields['graph_title_center'] = forms.BooleanField(initial=centered, required=False)
+
     CHOICES_COLOR = (
-        ('Standard', 'Standard'),
+        ('#636EFA', 'Standard'),
         ('Black', 'Black'),
         ('White', 'White'),
         ('Red', 'Red'),
@@ -97,10 +106,29 @@ class ChangeGraphLayoutForm(forms.Form):
         ('Yellow', 'Yellow')
     )
 
+    BG_CHOICES_COLOR = (
+        ('#f0f8ff', 'Standard'),
+        ('Black', 'Black'),
+        ('White', 'White'),
+        ('Red', 'Red'),
+        ('Blue', 'Blue'),
+        ('Green', 'Green'),
+        ('Purple', 'Purple'),
+        ('Yellow', 'Yellow')
+    )
+
+    GRAPH_CHOICES = (
+        ("Linjediagram", "Linjediagram"),
+        ("Stapeldiagram", "Stapeldiagram"),
+        ("Korrelationsgraf", "Korrelationsgraf"),
+        ("Kaka", "Kaka")
+    )
+
+    change_graph_type = forms.ChoiceField(choices=GRAPH_CHOICES, required=False)
     graph_title = forms.CharField(max_length=255, required=False)
-    graph_title_center = forms.BooleanField(required=False)
+    # graph_title_center = forms.BooleanField(required=False)
     color = forms.ChoiceField(choices=CHOICES_COLOR, required=False)
-    bg_color = forms.ChoiceField(choices=CHOICES_COLOR, required=False)
+    bg_color = forms.ChoiceField(choices=BG_CHOICES_COLOR, required=False)
     height = forms.CharField(max_length=255, required=False)
     width = forms.CharField(max_length=255, required=False)
     x_axis_start = forms.FloatField(required=False)

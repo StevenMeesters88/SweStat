@@ -7,30 +7,28 @@
         <button type="button" class="button" onclick="location.href='{% url 'upload_document' %}'">Back to data</button>
     </div>
 </div>
-
-<div class="center_div">
-    <h2 class="h2_title">Dashboard Config</h2>
-</div>
-
-<div class="center_div">
-    <form method="POST">
-        {% csrf_token %}
-        {% for field in graph_form %}
-            {% if field.label|slice:"0:5" == 'Titel' %}
-                {{ field }} <br><br><br>
-            {% else %}
-                {{ field }} <br>
-            {% endif %}
-        {% endfor %}
-        <button type="submit" class="button">Create Dashboard</button>
-    </form>
-</div>
-
 <br>
+<div class="center_div" style="background-color: black; black; border-radius: 25px;">
+    <br>
+    <h2 class="h2_title">Dashboard Config</h2>
 
-<div class="center_div">
-    <button type="button" class="button" onclick="location.href='{% url 'configure_dashboard' %}'">Add graph</button>
+    <div class="center_div">
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in graph_form %}
+                {% if field.label|slice:"0:5" == 'Titel' %}
+                    {{ field }} <br><br><br>
+                {% else %}
+                    {{ field }} <br>
+                {% endif %}
+            {% endfor %}
+            <button type="submit" class="button">Create Dashboard</button>
+        </form>
+        <div class="center_div">
+            <button type="button" class="button" onclick="location.href='{% url 'configure_dashboard' %}'">Add graph</button>
+        </div>
+    </div>
+    <br>
 </div>
-
-
+<br>
 {% endblock %}
