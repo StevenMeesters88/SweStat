@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{% load static %}
 
 <br>
 <br>
@@ -8,8 +9,6 @@
     <h2 class="h2_title">Upload a data file</h2>
 </div>
 
-<br>
-<br>
 <br>
 
 <div class="center_div">
@@ -20,6 +19,16 @@
         {% endfor %}
         <button class="button" type="submit">Skicka</button>
     </form>
+</div>
+
+<br><br><br>
+
+<div class="center_div">
+    <div class="inline">
+        <img src="{% static 'csvfile.svg' %}" style="width: 10%; height: 10%;">
+        <img src="{% static 'excelfile.png' %}" style="width: 10%; height: 10%;">
+        <img src="{% static 'pythonfile.png' %}" style="width: 10%; height: 10%;">
+    </div>
 </div>
 
 <br>

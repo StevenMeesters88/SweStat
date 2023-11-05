@@ -3,10 +3,15 @@ from . import models
 import pandas as pd
 
 
+def validate_file_extension(value):
+    if not value.name.endswith(('.csv', '.xlsx')):
+        raise forms.ValidationError("Only CSV or XLSX files are accepted")
+
+
 class LandingPageForm(forms.Form):
     csv_data = forms.FileField(widget=forms.FileInput(attrs={
         'accept': ".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"}),
-        label='Select a file')
+        label='Select a file', validators=[validate_file_extension])
 
 
 class CreateMultiLoopChartForm(forms.Form):

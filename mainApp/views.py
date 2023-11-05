@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 import plotly.express as px
 
-file_loc = r'/Users/stevenmeesters/PycharmProjects/SweStat/media/'  # /home/SweStat/SweStat/media i pythonanywhere
+file_loc = r'/Users/stevenmeesters/PycharmProjects/SweStat/media/'  # /home/SweStat/SweStat/media/ i pythonanywhere
 
 
 def home(request):
@@ -337,8 +337,7 @@ def change_layout(request, graph_no):
         if chart == 'Kaka':
             return px.pie(data_frame=df, names=x, values=y, title=titel).update_layout(plot_bgcolor=bg_color)
 
-    layout_data = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(
-        graph_id=graph_no).values()
+    layout_data = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(graph_id=graph_no).values()
     centered = False
     color = '#636EFA'
     bg_color = '#f0f8ff'
@@ -365,6 +364,10 @@ def change_layout(request, graph_no):
     title = None
     for x in graph_data:
         title = x['titel'] if x['titel'] != '' else 'Your Graph'
+        if layout_data:
+            for y in layout_data:
+                if y['graph_title'] is not None:
+                    title = y['graph_title']
         fig = create_chart(x['chart_type'], x['x'], x['y'], title, color, bg_color,
                            yaxis_start, yaxis_end, xaxis_start, xaxis_end)
 
@@ -384,18 +387,15 @@ def change_layout(request, graph_no):
         )
         fig = fig.to_html()
 
-    print(bg_color, type(bg_color))
-
     layout_form = forms.ChangeGraphLayoutForm(request.POST, title, centered, color) # bg_color, xaxis_start, xaxis_end, yaxis_start, yaxis_end)
-    print(layout_form, type(layout_form))
     if request.method == 'POST':
         if layout_form.is_valid():
-            title = ''
+            for x in graph_data:
+                title = x['titel']
             if layout_data:
                 for x in layout_data:
                     title = x['graph_title']
-            models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(
-                graph_id=graph_no).delete()
+            models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(graph_id=graph_no).delete()
             m = models.GraphLayoutModel(
                 session_key=request.session.session_key,
                 graph_id=graph_no,
