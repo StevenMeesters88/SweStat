@@ -173,49 +173,62 @@ def dashboard(request):
 
     graph_info = models.SimpleGraphModel.objects.filter(session_key=request.session.session_key).values()
 
-    def create_chart(chart_no, chart, x, y, titel, color, bg_color):
+    def create_chart(chart_no, chart, x, y, titel, color, bg_color, start_y, end_y, start_x, end_x):
         if chart == 'Linjediagram':
-            return px.line(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.line(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(
+                plot_bgcolor=bg_color, yaxis_range=[start_y, end_y], xaxis_range=[start_x, end_x])
         if chart == 'Stapeldiagram':
-            return px.bar(data_frame=df, x=x, y=y, title=titel).update_traces(marker_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.bar(data_frame=df, x=x, y=y, title=titel).update_traces(marker_color=color).update_layout(
+                plot_bgcolor=bg_color, yaxis_range=[start_y, end_y], xaxis_range=[start_x, end_x])
         if chart == 'Korrelationsgraf':
-            return px.scatter(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.scatter(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(
+                plot_bgcolor=bg_color, yaxis_range=[start_y, end_y], xaxis_range=[start_x, end_x])
         if chart == 'Kaka':
-            return px.pie(data_frame=df, names=x, values=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
+            return px.pie(data_frame=df, names=x, values=y, title=titel).update_layout(plot_bgcolor=bg_color)
 
     fig_list = []
     for x in graph_info:
         color = '#636EFA'
         bg_color = '#f0f8ff'
-        title = 'Your Graph'
-        print(f"Graph info: {x['graph_no']}")
-        layout_info = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(graph_id=x['graph_no']).values()
+        title = 'Your Graph' if x['titel'] == '' else x['titel']
+        yaxis_start = min(x['y'])
+        yaxis_end = max(x['y'])
+        xaxis_start = min(x['x'])
+        xaxis_end = max(x['x'])
+        layout_info = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(
+            graph_id=x['graph_no']).values()
         if layout_info:
             print(f"Graph info: {x['graph_no']}, LAYOUT FINNS")
             for d in layout_info:
                 color = d['color']
                 title = d['graph_title'] if d['graph_title'] != '' else 'Your Dashboard'
                 bg_color = d['bg_color']
+                yaxis_start = d['y_axis_sta'] if d['y_axis_sta'] != '' else min(x['y'])
+                yaxis_end = d['y_axis_end'] if d['y_axis_end'] != '' else max(x['y'])
+                xaxis_start = d['x_axis_sta'] if d['x_axis_sta'] != '' else min(x['x'])
+                xaxis_end = d['x_axis_end'] if d['x_axis_end'] != '' else max(x['x'])
 
-        fig = create_chart(chart_no=x['graph_no'], chart=x['chart_type'], x=x['x'], y=x['y'], titel=title, color=color, bg_color=bg_color)
+        fig = create_chart(chart_no=x['graph_no'], chart=x['chart_type'], x=x['x'], y=x['y'], titel=title,
+                           color=color, bg_color=bg_color, start_y=yaxis_start, end_y=yaxis_end,
+                           start_x=xaxis_start, end_x=xaxis_end)
         for data in layout_info:
             if data['graph_title_center'] is True:
                 fig.update_layout(title_x=0.5)
 
         fig.update_xaxes(
-                mirror=True,
-                ticks='outside',
-                showline=True,
-                linecolor='black' if bg_color != 'black' else 'white',
-                gridcolor='lightgrey' if bg_color != 'black' else 'white',
-            )
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black' if bg_color != 'black' else 'white',
+            gridcolor='lightgrey' if bg_color != 'black' else 'white',
+        )
         fig.update_yaxes(
-                mirror=True,
-                ticks='outside',
-                showline=True,
-                linecolor='black' if bg_color != 'black' else 'white',
-                gridcolor='lightgrey' if bg_color != 'black' else 'white',
-            )
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black' if bg_color != 'black' else 'white',
+            gridcolor='lightgrey' if bg_color != 'black' else 'white',
+        )
 
         fig = fig.to_html()
         fig_list.append([x['graph_no'], fig])
@@ -307,51 +320,74 @@ def change_layout(request, graph_no):
 
     df = get_data_file(xt)
 
-    def create_chart(chart, x, y, titel, color, bg_color):
-        if chart == 'Linjediagram':
-            fig = px.line(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color)
-            fig.update_xaxes(
-                        mirror=True,
-                        ticks='outside',
-                        showline=True,
-                        linecolor='black',
-                        gridcolor='lightgrey'
-                    )
-            fig.update_yaxes(
-                mirror=True,
-                ticks='outside',
-                showline=True,
-                linecolor='black',
-                gridcolor='lightgrey'
-            )
-            fig = fig.to_html()
-            return fig
-        if chart == 'Stapeldiagram':
-            return px.bar(data_frame=df, x=x, y=y, title=titel).update_traces(marker_color=color).update_layout(plot_bgcolor=bg_color).to_html()
-        if chart == 'Korrelationsgraf':
-            return px.scatter(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color).to_html()
-        if chart == 'Kaka':
-            return px.pie(data_frame=df, names=x, values=y, title=titel).update_traces(line_color=color).update_layout(plot_bgcolor=bg_color).to_html()
-
-    layout_data = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(graph_id=graph_no).values()
-    centered = False
-    color = '#636EFA'
-    graph_bg = '#f0f8ff'
-    if layout_data:
-        for x in layout_data:
-            centered = x['graph_title_center']
-            print('db value', centered)
-            color = x['color']
-            graph_bg = x['bg_color']
-
-    # get the graph
     graph_data = models.SimpleGraphModel.objects.filter(session_key=request.session.session_key).filter(
         graph_no=graph_no).values()
+
+    def create_chart(chart, x, y, titel, color, bg_color, start_y, end_y, start_x, end_x):
+        if chart == 'Linjediagram':
+            fig = px.line(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(
+                plot_bgcolor=bg_color, yaxis_range=[start_y, end_y], xaxis_range=[start_x, end_x])
+            return fig
+        if chart == 'Stapeldiagram':
+            return px.bar(data_frame=df, x=x, y=y, title=titel).update_traces(marker_color=color).update_layout(
+                plot_bgcolor=bg_color, yaxis_range=[start_y, end_y], xaxis_range=[start_x, end_x])
+        if chart == 'Korrelationsgraf':
+            return px.scatter(data_frame=df, x=x, y=y, title=titel).update_traces(line_color=color).update_layout(
+                plot_bgcolor=bg_color, yaxis_range=[start_y, end_y], xaxis_range=[start_x, end_x])
+        if chart == 'Kaka':
+            return px.pie(data_frame=df, names=x, values=y, title=titel).update_layout(plot_bgcolor=bg_color)
+
+    layout_data = models.GraphLayoutModel.objects.filter(session_key=request.session.session_key).filter(
+        graph_id=graph_no).values()
+    centered = False
+    color = '#636EFA'
+    bg_color = '#f0f8ff'
+    yaxis_start = None
+    yaxis_end = None
+    xaxis_start = None
+    xaxis_end = None
+    for x in graph_data:
+        yaxis_start = min(x['y'])
+        yaxis_end = max(x['y'])
+        xaxis_start = min(x['x'])
+        xaxis_end = max(x['x'])
+
+    if layout_data:
+        for x in layout_data:
+            centered = x['graph_title_center']  # fix the checkbox when ticked!
+            color = x['color']
+            bg_color = x['bg_color']
+            yaxis_start = x['y_axis_sta'] if x['y_axis_sta'] != '' else min(x['y'])
+            yaxis_end = x['y_axis_end'] if x['y_axis_end'] != '' else max(x['y'])
+            xaxis_start = x['x_axis_sta'] if x['x_axis_sta'] != '' else min(x['x'])
+            xaxis_end = x['x_axis_end'] if x['x_axis_end'] != '' else max(x['x'])
+
+    title = None
     for x in graph_data:
         title = x['titel'] if x['titel'] != '' else 'Your Graph'
-        fig = create_chart(x['chart_type'], x['x'], x['y'], title, color, graph_bg)
+        fig = create_chart(x['chart_type'], x['x'], x['y'], title, color, bg_color,
+                           yaxis_start, yaxis_end, xaxis_start, xaxis_end)
 
-    layout_form = forms.ChangeGraphLayoutForm(request.POST, centered)
+        fig.update_xaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black' if bg_color != 'black' else 'white',
+            gridcolor='lightgrey' if bg_color != 'black' else 'white',
+        )
+        fig.update_yaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black' if bg_color != 'black' else 'white',
+            gridcolor='lightgrey' if bg_color != 'black' else 'white',
+        )
+        fig = fig.to_html()
+
+    print(bg_color, type(bg_color))
+
+    layout_form = forms.ChangeGraphLayoutForm(request.POST, title, centered, color) # bg_color, xaxis_start, xaxis_end, yaxis_start, yaxis_end)
+    print(layout_form, type(layout_form))
     if request.method == 'POST':
         if layout_form.is_valid():
             title = ''
@@ -367,8 +403,6 @@ def change_layout(request, graph_no):
                     'graph_title'],
                 color=layout_form.cleaned_data['color'],
                 bg_color=layout_form.cleaned_data['bg_color'],
-                height=layout_form.cleaned_data['height'],
-                width=layout_form.cleaned_data['width'],
                 x_axis_sta=layout_form.cleaned_data['x_axis_start'],
                 x_axis_end=layout_form.cleaned_data['x_axis_end'],
                 y_axis_sta=layout_form.cleaned_data['y_axis_start'],
