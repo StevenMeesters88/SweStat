@@ -1,6 +1,11 @@
 from django.db import models
 
 
+class VisitorData(models.Model):
+    ip = models.CharField(max_length=255, null=False)
+    datetime = models.CharField(max_length=255, null=False)
+
+
 # Create your models here.
 class Document(models.Model):
     session_key = models.CharField(max_length=255)

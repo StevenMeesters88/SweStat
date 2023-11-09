@@ -6,12 +6,24 @@ import os
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 import plotly.express as px
+from datetime import datetime
 
 file_loc = r'/Users/stevenmeesters/PycharmProjects/SweStat/media/'  # /home/SweStat/SweStat/media/ i pythonanywhere
 
 
 def home(request):
     # add deletion of data!
+
+    req_headers = request.META
+    x_forwarded_for_value = req_headers.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for_value:
+        ip_addr = x_forwarded_for_value.split(',')[-1].strip()
+    else:
+        ip_addr = req_headers.get('REMOTE_ADDR')
+
+    user_m = models.VisitorData(ip=ip_addr, datetime=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+    user_m.save()
+
     def delete_data():
         models.Document.objects.filter(session_key=request.session.session_key).delete()
         models.DocumentVariables.objects.filter(session_key=request.session.session_key).delete()
