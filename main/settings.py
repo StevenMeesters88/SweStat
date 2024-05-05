@@ -121,7 +121,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-# IN PYTON ANYWHERE
+# IN PYTON ANYWHERE c
 # STATIC_URL = '/home/SweStat/SweStat/static'
 # STATIC_ROOT = '/home/SweStat/SweStat/static'
 
